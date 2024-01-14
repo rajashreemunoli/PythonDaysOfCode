@@ -7,12 +7,12 @@ list=[]
 try:
 	print("Enter elements: ")
 
-	#take inputs while we do not enter non-inetger types
+	#take inputs while we do not enter non-inetger or non-float types
 	while True:
 		x=float(input())
 		list.append(x)
 
-# When the code finds any non-integer type input, it will proceed to here
+# When the code finds any non-integer or non-float type input, it will proceed to here
 except:
 	# Printing the list (assuming the input sequence has ended)
 	print("List: ",list)
