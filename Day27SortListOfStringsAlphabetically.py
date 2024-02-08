@@ -11,13 +11,15 @@ def sort_list(fp):
 
 	# Sort the strings
 	list1.sort()
+	list2=[x for x in list1 if x.strip()]
  
 	# Open the file for writing
 	with open(fp, "w") as f:
-		for line in list1:
+		for line in list2:
 			f.write(line + "\n")
 
-	print("sorted list: ",list1)
+	print("sorted list: ",list2)
+
  
 # Print the sorted names
 fname=input("Enter text file name:\n")
