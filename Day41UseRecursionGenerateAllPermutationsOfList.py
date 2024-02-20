@@ -7,7 +7,7 @@ def permute_list(lst,f=0):
 	for s in range(f,len(lst)):
 		lst[f],lst[s]=lst[s],lst[f]
 		permute_list(lst,f+1)
-		lst[f],lst[s]=lst[s],lst[f]
+		#lst[f],lst[s]=lst[s],lst[f]
 
 
 permute_list([1,2,3])
