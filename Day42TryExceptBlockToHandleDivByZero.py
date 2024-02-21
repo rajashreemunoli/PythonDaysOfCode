@@ -3,7 +3,7 @@ def avg_list(l):
 	try:
 		return sum(l)/len(l)
 	except ZeroDivisionError:
-		print("Empty List!")
+		print("Empty lists are not acceptable.")
 		
 
 
