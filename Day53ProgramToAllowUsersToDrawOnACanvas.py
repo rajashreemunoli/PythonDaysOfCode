@@ -17,6 +17,11 @@ class PaintApp:
         self.prev_x = None
         self.prev_y = None
 
+        # For undo/redo
+        self.selected_tool = "pen"
+        self.shapes = []
+        self.undo_stack = []
+
     def setup_navbar(self):
         self.navbar = tk.Menu(self.root)
         self.root.config(menu=self.navbar)
@@ -103,26 +108,26 @@ class PaintApp:
         if self.selected_tool == "pen":
             if self.prev_x is not None and self.prev_y is not None:
                 if self.selected_pen_type == "line":
-                    self.canvas.create_line(self.prev_x, self.prev_y, event.x, event.y, fill=self.selected_color,
+                    shape_id = self.canvas.create_line(self.prev_x, self.prev_y, event.x, event.y, fill=self.selected_color,
                                             width=self.selected_size, smooth=True)
                 elif self.selected_pen_type == "round":
                     x1 = event.x - self.selected_size
                     y1 = event.y - self.selected_size
                     x2 = event.x + self.selected_size
                     y2 = event.y + self.selected_size
-                    self.canvas.create_oval(x1, y1, x2, y2, fill=self.selected_color, outline=self.selected_color)
+                    shape_id = self.canvas.create_oval(x1, y1, x2, y2, fill=self.selected_color, outline=self.selected_color)
                 elif self.selected_pen_type == "square":
                     x1 = event.x - self.selected_size
                     y1 = event.y - self.selected_size
                     x2 = event.x + self.selected_size
                     y2 = event.y + self.selected_size
-                    self.canvas.create_rectangle(x1, y1, x2, y2, fill=self.selected_color, outline=self.selected_color)
+                    shape_id = self.canvas.create_rectangle(x1, y1, x2, y2, fill=self.selected_color, outline=self.selected_color)
                 elif self.selected_pen_type == "arrow":
                     x1 = event.x - self.selected_size
                     y1 = event.y - self.selected_size
                     x2 = event.x + self.selected_size
                     y2 = event.y + self.selected_size
-                    self.canvas.create_polygon(x1, y1, x1, y2, event.x, y2, fill=self.selected_color,
+                    shape_id = self.canvas.create_polygon(x1, y1, x1, y2, event.x, y2, fill=self.selected_color,
                                                outline=self.selected_color)
                 elif self.selected_pen_type == "diamond":
                     x1 = event.x - self.selected_size
@@ -133,8 +138,10 @@ class PaintApp:
                     y3 = event.y
                     x4 = event.x
                     y4 = event.y + self.selected_size
-                    self.canvas.create_polygon(x1, y1, x2, y2, x3, y3, x4, y4, fill=self.selected_color,
+                    shape_id = self.canvas.create_polygon(x1, y1, x2, y2, x3, y3, x4, y4, fill=self.selected_color,
                                                outline=self.selected_color)
+                # Add to shapes list for undo/redo
+                self.shapes.append(shape_id)
             self.prev_x = event.x
             self.prev_y = event.y
 
@@ -142,26 +149,26 @@ class PaintApp:
         elif self.selected_tool == "eraser":
             if self.prev_x is not None and self.prev_y is not None:
                 if self.selected_pen_type == "line":
-                    self.canvas.create_line(self.prev_x, self.prev_y, event.x, event.y, fill="white",
+                    shape_id = self.canvas.create_line(self.prev_x, self.prev_y, event.x, event.y, fill="white",
                                             width=self.selected_size, smooth=True)
                 elif self.selected_pen_type == "round":
                     x1 = event.x - self.selected_size
                     y1 = event.y - self.selected_size
                     x2 = event.x + self.selected_size
                     y2 = event.y + self.selected_size
-                    self.canvas.create_oval(x1, y1, x2, y2, fill="white", outline="white")
+                    shape_id = self.canvas.create_oval(x1, y1, x2, y2, fill="white", outline="white")
                 elif self.selected_pen_type == "square":
                     x1 = event.x - self.selected_size
                     y1 = event.y - self.selected_size
                     x2 = event.x + self.selected_size
                     y2 = event.y + self.selected_size
-                    self.canvas.create_rectangle(x1, y1, x2, y2, fill="white", outline="white")
+                    shape_id = self.canvas.create_rectangle(x1, y1, x2, y2, fill="white", outline="white")
                 elif self.selected_pen_type == "arrow":
                     x1 = event.x - self.selected_size
                     y1 = event.y - self.selected_size
                     x2 = event.x + self.selected_size
                     y2 = event.y + self.selected_size
-                    self.canvas.create_polygon(x1, y1, x1, y2, event.x, y2, fill="white",
+                    shape_id = self.canvas.create_polygon(x1, y1, x1, y2, event.x, y2, fill="white",
                                                outline="white")
                 elif self.selected_pen_type == "diamond":
                     x1 = event.x - self.selected_size
@@ -172,8 +179,10 @@ class PaintApp:
                     y3 = event.y
                     x4 = event.x
                     y4 = event.y + self.selected_size
-                    self.canvas.create_polygon(x1, y1, x2, y2, x3, y3, x4, y4, fill="white",
+                    shape_id = self.canvas.create_polygon(x1, y1, x2, y2, x3, y3, x4, y4, fill="white",
                                                outline="white")
+                 # Add to shapes list for undo/redo
+                self.shapes.append(shape_id)
             self.prev_x = event.x
             self.prev_y = event.y
 
@@ -184,6 +193,8 @@ class PaintApp:
 
     def clear_canvas(self):
         self.canvas.delete("all")
+        self.shapes = []
+        self.undo_stack = []
 
     def take_snapshot(self):
         #self.canvas.postscript(file="snapshot.eps")
@@ -196,10 +207,14 @@ class PaintApp:
         im.save('snapshot.png')
 
     def undo(self):
-        items = self.canvas.find_all
-        print(items)
-        if items:
-            self.canvas.delete(items[-1])
+        # items = self.canvas.find_all
+        # print(items)
+        # if items:
+        #     self.canvas.delete(items[-1])
+        if self.shapes:
+            shape_id = self.shapes.pop()
+            self.undo_stack.append(shape_id)
+            self.canvas.delete(shape_id)
 
 if __name__ == "__main__":
     root = tk.Tk()
