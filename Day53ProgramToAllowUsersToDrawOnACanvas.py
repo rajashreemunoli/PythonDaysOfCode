@@ -102,87 +102,55 @@ class PaintApp:
     def select_pen_type(self, pen_type):
         self.selected_pen_type = pen_type
 
+    def draw_on_canvas(self, event, color):
+        if self.selected_pen_type == "line":
+            shape_id = self.canvas.create_line(self.prev_x, self.prev_y, event.x, event.y, fill=color,
+                                            width=self.selected_size, smooth=True)
+        elif self.selected_pen_type == "round":
+            x1 = event.x - self.selected_size
+            y1 = event.y - self.selected_size
+            x2 = event.x + self.selected_size
+            y2 = event.y + self.selected_size
+            shape_id = self.canvas.create_oval(x1, y1, x2, y2, fill=color, outline=color)
+        elif self.selected_pen_type == "square":
+            x1 = event.x - self.selected_size
+            y1 = event.y - self.selected_size
+            x2 = event.x + self.selected_size
+            y2 = event.y + self.selected_size
+            shape_id = self.canvas.create_rectangle(x1, y1, x2, y2, fill=color, outline=color)
+        elif self.selected_pen_type == "arrow":
+            x1 = event.x - self.selected_size
+            y1 = event.y - self.selected_size
+            x2 = event.x + self.selected_size
+            y2 = event.y + self.selected_size
+            shape_id = self.canvas.create_polygon(x1, y1, x1, y2, event.x, y2, fill=color,
+                                        outline=color)
+        elif self.selected_pen_type == "diamond":
+            x1 = event.x - self.selected_size
+            y1 = event.y
+            x2 = event.x
+            y2 = event.y - self.selected_size
+            x3 = event.x + self.selected_size
+            y3 = event.y
+            x4 = event.x
+            y4 = event.y + self.selected_size
+            shape_id = self.canvas.create_polygon(x1, y1, x2, y2, x3, y3, x4, y4, fill=color,
+                                        outline=color)
+        # Add to shapes list for undo/redo
+        self.shapes.append(shape_id)
+
+
     def draw(self, event):
-        
     #If "Pen" button is selected,draw with choosen brush and color
         if self.selected_tool == "pen":
             if self.prev_x is not None and self.prev_y is not None:
-                if self.selected_pen_type == "line":
-                    shape_id = self.canvas.create_line(self.prev_x, self.prev_y, event.x, event.y, fill=self.selected_color,
-                                            width=self.selected_size, smooth=True)
-                elif self.selected_pen_type == "round":
-                    x1 = event.x - self.selected_size
-                    y1 = event.y - self.selected_size
-                    x2 = event.x + self.selected_size
-                    y2 = event.y + self.selected_size
-                    shape_id = self.canvas.create_oval(x1, y1, x2, y2, fill=self.selected_color, outline=self.selected_color)
-                elif self.selected_pen_type == "square":
-                    x1 = event.x - self.selected_size
-                    y1 = event.y - self.selected_size
-                    x2 = event.x + self.selected_size
-                    y2 = event.y + self.selected_size
-                    shape_id = self.canvas.create_rectangle(x1, y1, x2, y2, fill=self.selected_color, outline=self.selected_color)
-                elif self.selected_pen_type == "arrow":
-                    x1 = event.x - self.selected_size
-                    y1 = event.y - self.selected_size
-                    x2 = event.x + self.selected_size
-                    y2 = event.y + self.selected_size
-                    shape_id = self.canvas.create_polygon(x1, y1, x1, y2, event.x, y2, fill=self.selected_color,
-                                               outline=self.selected_color)
-                elif self.selected_pen_type == "diamond":
-                    x1 = event.x - self.selected_size
-                    y1 = event.y
-                    x2 = event.x
-                    y2 = event.y - self.selected_size
-                    x3 = event.x + self.selected_size
-                    y3 = event.y
-                    x4 = event.x
-                    y4 = event.y + self.selected_size
-                    shape_id = self.canvas.create_polygon(x1, y1, x2, y2, x3, y3, x4, y4, fill=self.selected_color,
-                                               outline=self.selected_color)
-                # Add to shapes list for undo/redo
-                self.shapes.append(shape_id)
+                self.draw_on_canvas(event, self.selected_color)
             self.prev_x = event.x
             self.prev_y = event.y
-
     #If "Eraser" button is selected,draw with choosen brush and WHITE color
         elif self.selected_tool == "eraser":
             if self.prev_x is not None and self.prev_y is not None:
-                if self.selected_pen_type == "line":
-                    shape_id = self.canvas.create_line(self.prev_x, self.prev_y, event.x, event.y, fill="white",
-                                            width=self.selected_size, smooth=True)
-                elif self.selected_pen_type == "round":
-                    x1 = event.x - self.selected_size
-                    y1 = event.y - self.selected_size
-                    x2 = event.x + self.selected_size
-                    y2 = event.y + self.selected_size
-                    shape_id = self.canvas.create_oval(x1, y1, x2, y2, fill="white", outline="white")
-                elif self.selected_pen_type == "square":
-                    x1 = event.x - self.selected_size
-                    y1 = event.y - self.selected_size
-                    x2 = event.x + self.selected_size
-                    y2 = event.y + self.selected_size
-                    shape_id = self.canvas.create_rectangle(x1, y1, x2, y2, fill="white", outline="white")
-                elif self.selected_pen_type == "arrow":
-                    x1 = event.x - self.selected_size
-                    y1 = event.y - self.selected_size
-                    x2 = event.x + self.selected_size
-                    y2 = event.y + self.selected_size
-                    shape_id = self.canvas.create_polygon(x1, y1, x1, y2, event.x, y2, fill="white",
-                                               outline="white")
-                elif self.selected_pen_type == "diamond":
-                    x1 = event.x - self.selected_size
-                    y1 = event.y
-                    x2 = event.x
-                    y2 = event.y - self.selected_size
-                    x3 = event.x + self.selected_size
-                    y3 = event.y
-                    x4 = event.x
-                    y4 = event.y + self.selected_size
-                    shape_id = self.canvas.create_polygon(x1, y1, x2, y2, x3, y3, x4, y4, fill="white",
-                                               outline="white")
-                 # Add to shapes list for undo/redo
-                self.shapes.append(shape_id)
+                self.draw_on_canvas(event, "white")
             self.prev_x = event.x
             self.prev_y = event.y
 
@@ -190,6 +158,7 @@ class PaintApp:
     def release(self, event):
         self.prev_x = None
         self.prev_y = None
+
 
     def clear_canvas(self):
         self.canvas.delete("all")
