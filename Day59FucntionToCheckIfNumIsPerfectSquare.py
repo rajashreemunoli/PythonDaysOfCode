@@ -1,4 +1,5 @@
 #Create a function that checks if a number is a perfect square
+#Binary Search Method
 def isperfectsquare(num):
     if num<2:
         return True
